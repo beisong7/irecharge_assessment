@@ -58,6 +58,6 @@ class TransactionRepo {
     }
 
     public function getPendingByRef($ref){
-        return Transaction::where('tx_ref', $ref)->where('completed', false)->where('status','authorizing')->first();
+        return Transaction::where('tx_ref', $ref)->where('completed', false)->first();
     }
 }
