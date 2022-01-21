@@ -49,7 +49,7 @@ trait PaymentTrait
      * @param $stage
      * @return array
      */
-    private function formData(Request $request, $stage){
+    private function formData(Request $request, $stage=null){
         $data = [];
         $fields = $stage==="otp"? $this->otpFields() : $this->fields();
         foreach ($fields as $item){
@@ -65,7 +65,7 @@ trait PaymentTrait
      * @param $currentStage
      * @return array
      */
-    public function requiredFields($currentStage){
+    public function requiredFields($currentStage = null){
         if($currentStage==="otp"){
             return [
                 "flw_ref"=>"required",
