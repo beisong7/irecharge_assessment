@@ -19,4 +19,4 @@
 - ``` php artisan migrate --seed ```  to load the database with the basic information
 - serve application with ``` php artisan serve ``` or on homestead
 
-- view API docs [here!](https://laravel.com/docs/routing). 
+- view API docs [here!](https://www.getpostman.com/collections/84b3e2a5bbc79fbfcf16). 
