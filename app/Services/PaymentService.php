@@ -125,13 +125,14 @@ class PaymentService extends PaymentRepo
 
             $transaction = $tranResponse['transaction'];
 
-            $encryptedData = $this->encrypt($data);
+            if($currentStage==="pin"){
+                $data = $this->encrypt($data);
+            }
+
 
 
             $link = $this->setLink($currentStage);
-            $chargeRes = $this->makeRequest("POST", $link, $encryptedData);
-
-            return $chargeRes;
+            $chargeRes = $this->makeRequest("POST", $link, $data);
 
 
 
@@ -139,20 +140,16 @@ class PaymentService extends PaymentRepo
 
             //actions to do on success
             if($chargeRes['success']){
-                $chargeData = [];
-                if($currentStage==="pin"){
-                    $chargeData = $chargeRes['data']['data'];
-                }else{
-
-                }
+                $chargeData = $chargeRes['data']['data'];
 
                 $status = $chargeData['status'];
                 $tx_id = $chargeData['id'];
 
+                $message = $chargeData['processor_response'];
                 //check status
                 if($status==='pending'){
 
-                    $message = $chargeData['processor_response'];
+
                     $flw_ref = $chargeData['flw_ref'];
 
                     // update transaction
@@ -173,6 +170,21 @@ class PaymentService extends PaymentRepo
 
                     //verify payment
 //                    return $this->verifyPayment($transaction);
+                }elseif ($status==="successful"){
+                    $d['transaction_id'] = $transaction->uuid;
+                    $d['customer_id'] = $transaction->customer_id;
+                    $d['amount'] = $transaction->amount;
+                    $payment = $this->save($this->paymentData($d));
+                    $verifyRes['payment'] = $payment;
+
+                    //update transaction
+                    $newPayload['status'] = "completed";
+                    $newPayload['completed'] = true;
+                    $newPayload['success'] = true;
+                    $newPayload['ends'] = time();
+                    $newPayload['gateway_msg'] = $message;
+                    $this->transactionService->itemUpdate($transaction, $newPayload);
+                    return $chargeRes;
                 }
             }
             return $chargeRes;
